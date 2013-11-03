@@ -11,6 +11,8 @@ if( isset($_POST['email']) && isset($_POST['weight']) )
 	die();
 }
 
+JOHNSON
+
 ?>
 
 <!DOCTYPE html>
