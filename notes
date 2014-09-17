@@ -1,0 +1,45 @@
+two forms
+
+two hidden form fields filled with document.getElementById("searchTxt").value;
+
+//
+
+between createWorkout and community, page stays the same. Between createWorkout and others, shifts
+
+
+$mq = "SELECT * FROM ( SELECT NAME, PRICE, TYPE, ROWNUM rn FROM COMPUTER ) WHERE rn=:rP";
+
+oci_execute($get);
+
+while ( $row = oci_fetch_array($get, OCI_ASSOC) ){
+    foreach ($row as $column){
+       $i++;
+
+sortable widget
+
+fetchWorkoutID( $email ) 	for current workout creation
+
+fetchExercises( $workoutID )	to display table of exercises
+
+addIncomplete( $workoutID )
+
+deleteIncomplete( $workoutID )
+
+clearIncomplete()		at beginning of each page
+
+addExercise( all attributes )
+
+editExercise( $exerciseID, all attributes )
+
+deleteExercise( $exerciseID )
+
+deleteWorkout( $workoutID )
+
+//
+
+PUT FACEBOOK STUFF IN
+
+//
+
+Find others workouts
+

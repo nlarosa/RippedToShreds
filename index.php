@@ -4,109 +4,110 @@ include('./core/init.inc.php');
 
 function validEmail( $email )						// checks for valid email addresses
 {
-	if( filter_var( $email, FILTER_VALIDATE_EMAIL ) )
-	{
-		$allowed = array( 'nd.edu', 'gmail.com' );		// only support nd.edu emails
-		$domain = array_pop( explode( '@', $email ) );
-		if( in_array( $domain, $allowed ) )
+		if( filter_var( $email, FILTER_VALIDATE_EMAIL ) )
 		{
-			return TRUE;
+				$allowed = array( 'nd.edu', 'gmail.com', 'yahoo.com' );		// only support nd.edu emails
+				$domain = array_pop( explode( '@', $email ) );
+				if( in_array( $domain, $allowed ) )
+				{
+						return TRUE;
+				}
 		}
-	}
-	else
-	{
-		return FALSE;
-	}
+		else
+		{
+				return FALSE;
+		}
 }
 
 function validPass( $password )						// checks for valid password
 {
-	if( preg_match( "/^.*(?=.{8,}).*$/", $password ) )
-	{
-		return TRUE;
-	}
-	else
-	{
-		return FALSE;
-	}
+		if( preg_match( "/^.*(?=.{8,}).*$/", $password ) )
+		{
+				return TRUE;
+		}
+		else
+		{
+				return FALSE;
+		}
 }
 
 $errors = array();
-	
+
 if( isset($_POST['email']) && isset($_POST['passWord']) )		// check for correct login
 {
-	if( empty($_POST['email']) )
-	{
-		$errors[] = 'Please provide your email address. ';
-	}
-	if( empty($_POST['passWord']) )
-	{
-		$errors[] = 'Please provide your password. ';
-	}
-	if( !empty($_POST['email']) && !empty($_POST['passWord']) && !validCredentials($_POST['email'], sha1($_POST['passWord'])) )
-	{
-		$errors[] = 'Username and/or password is incorrect. ';
-	}
-	if( empty($errors) && !isActive($_POST['email']) )
-	{
-		$errors[] = 'This profile has not yet been activated.';
-	}
-	if( empty($errors) )
-	{
-		$_SESSION['user'] = $_POST['email'];
-		header("Location: main.php?user={$_SESSION['user']}");
-		die();
-	}
+		if( empty($_POST['email']) )
+		{
+				$errors[] = 'Please provide your email address. ';
+		}
+		if( empty($_POST['passWord']) )
+		{
+				$errors[] = 'Please provide your password. ';
+		}
+		if( !empty($_POST['email']) && !empty($_POST['passWord']) && !validCredentials($_POST['email'], sha1($_POST['passWord'])) )
+		{
+				$errors[] = 'Username and/or password is incorrect. ';
+		}
+		if( empty($errors) && !isActive($_POST['email']) )
+		{
+				$errors[] = 'This profile has not yet been activated. Please check your email.';
+		}
+		if( empty($errors) )
+		{
+				$_SESSION['user'] = $_POST['email'];
+				$_SESSION['id'] = -1;
+				header("Location: calendar.php");
+				die();
+		}
 }
 
 $regErrors = array();
 
 if( isset($_POST['regEmail']) && isset($_POST['regPassWord']) && isset($_POST['repeatPassWord']) )	// check for correct registration
 {
-	if( empty($_POST['regEmail']) || !validEmail( $_POST['regEmail'] ) )
-	{
-                $regErrors[] = 'Please provide a valid email address.';
-        }
-        if( empty($_POST['regPassWord']) || empty($_POST['repeatPassWord']) || !validPass($_POST['regPassWord']) )
-	{
-		$regErrors[] = 'Please provide a valid password (8 characters/digits or more).';
-        }
-        if( $_POST['regPassWord'] !== $_POST['repeatPassWord'] )
-	{
-                $regErrors[] = 'Passwords do not match.';
-        }
-	if( userExists($_POST['regEmail']) )
-	{
-                $regErrors[] = 'An account already exists for that email address.';
-        }
-	if( empty($_POST['firstName']) || empty($_POST['lastName']) )
-	{
-		$regErrors[] = 'Please enter your first and last name.';
-	}
-	if( empty($_POST['height']) || empty($_POST['weight']) || empty($_POST['age']) || empty($_POST['calories']) )
-	{
-		$regErrors[] = 'Please complete all fitness information.';
-	}
-	else if( !is_numeric( $_POST['height'] ) || !is_numeric( $_POST['weight'] ) || !is_numeric( $_POST['age'] ) || !is_numeric( $_POST['calories'] ) )
-	{
-		$regErrors[] = 'Fitness information requires numeric inputs.';
-	}	
+		if( empty($_POST['regEmail']) || !validEmail( $_POST['regEmail'] ) )
+		{
+				$regErrors[] = 'Please provide a valid email address.';
+		}
+		if( empty($_POST['regPassWord']) || empty($_POST['repeatPassWord']) || !validPass($_POST['regPassWord']) )
+		{
+				$regErrors[] = 'Please provide a valid password (8 characters/digits or more).';
+		}
+		if( $_POST['regPassWord'] !== $_POST['repeatPassWord'] )
+		{
+				$regErrors[] = 'Passwords do not match.';
+		}
+		if( userExists($_POST['regEmail']) )
+		{
+				$regErrors[] = 'An account already exists for that email address.';
+		}
+		if( empty($_POST['firstName']) || empty($_POST['lastName']) )
+		{
+				$regErrors[] = 'Please enter your first and last name.';
+		}
+		if( empty($_POST['height']) || empty($_POST['weight']) || empty($_POST['age']) || empty($_POST['calories']) )
+		{
+				$regErrors[] = 'Please complete all fitness information.';
+		}
+		else if( !is_numeric( $_POST['height'] ) || !is_numeric( $_POST['weight'] ) || !is_numeric( $_POST['age'] ) || !is_numeric( $_POST['calories'] ) )
+		{
+				$regErrors[] = 'Fitness information requires numeric inputs.';
+		}	
 
-        if( empty($regErrors) )										// no errors, add the account
-	{
-		addUser( $_POST['regEmail'], sha1($_POST['regPassWord']), $_POST['firstName'], $_POST['lastName'], $_POST['age'], $_POST['height'], $_POST['weight'], $_POST['calories'] );
-		header('Location: index.php?success=1');
-		die();
-	}
+		if( empty($regErrors) )										// no errors, add the account
+		{
+				addUser( $_POST['regEmail'], sha1($_POST['regPassWord']), $_POST['firstName'], $_POST['lastName'], $_POST['age'], $_POST['height'], $_POST['weight'], $_POST['calories'] );
+				header('Location: index.php?success=1');
+				die();
+		}
 }
 
 /*
 if( isset($_SESSION['user']) )
 {
-	header('Location: main.php');
+	header('Location: search.php');
 	die();
 }
-*/
+ */
 
 ?>
 
@@ -117,15 +118,27 @@ if( isset($_SESSION['user']) )
 	<!-- Set the viewport width to device width for mobile -->
 
 	<title>Ripped to Shreds</title>
-	
+
 	<link rel="icon" type="img/ico" href="favicon.ico">
-	<link rel="stylesheet" href="./stylesheets/foundation.css">
-	
+	<style type="text/css">
+		@import "./stylesheets/docs.css";
+		@import "./stylesheets/foundation.css";
+
+		body 
+		{ 
+			background: url(./images/america.jpg) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+	</style>
+
 	<script src="javascripts/modernizr.foundation.js"></script>
 </head>
 
 <body>
-	<div class="row"> 
+	<div class="row" style="background-color:#FFFFFF">
 		<div class="one column">
 		</div>	
 		<div class="five columns" align="center" style="background-color:#CCCCFF; margin:2.5% 0%;">
@@ -139,7 +152,7 @@ if( isset($_SESSION['user']) )
 		<hr />
 	</div>
 
-	<div class="row">
+	<div class="row" style="background-color:#FFFFFF">
 		<div class="one column">
 		</div>
 		<div class="ten columns" align="center">
@@ -151,26 +164,26 @@ if( isset($_SESSION['user']) )
 		<div class="one column">
 		</div>
 	</div>
-	
-	<div class="row">
+
+	<div class="row" style="background-color:#FFFFFF">
 		<div class="one column">
 		</div>
 		<div class="five columns" style="background-color:#FFCCCC; margin-bottom:2.5%;">
 			<h4>Login</h4>
-			<?php 
-			if( $_GET['activated'] == 1 )
-			{
-			?>
+<?php 
+if( $_GET['activated'] == 1 )
+{
+?>
 				<p>Account verified! Login below.</p>
-			<?php
-			}
-			else
-			{
-			?>
+<?php
+}
+else
+{
+?>
 				<p>For returning users</p>
-			<?php
-			}
-			?>
+<?php
+}
+?>
 			<form method="POST">
 				<div class="row">
 					<div class="three columns">
@@ -190,16 +203,51 @@ if( isset($_SESSION['user']) )
 				</div>
 				<br>
 				<button type="submit" class="button">Sign in</button>
-				<?php 
-				if( !empty($errors) )
-				{
-				?>
+<?php 
+if( !empty($errors) )
+{
+?>
 					<a href="" class="button alert" name="loginErrors" data-reveal-id="loginModal">Errors</a>
-				<?php 
-				}
-				?>
+<?php 
+}
+?>
 			</form>
-		</div>
+
+			<div id="fb-root"></div>
+<script>
+window.fbAsyncInit = function() {
+		// init the FB JS SDK
+		FB.init({
+				appId      : '550276045049462',                        // App ID from the app dashboard
+						status     : true,                                 // Check Facebook Login status
+						xfbml      : true                                  // Look for social plugins on the page
+		});
+
+		// Additional initialization code such as adding Event Listeners goes here
+};
+// Load the SDK asynchronously
+(function(){
+		// If we've already installed the SDK, we're done
+		if (document.getElementById('facebook-jssdk')) {return;}
+				// Get the first script element, which we'll use to find the parent node
+				var firstScriptElement = document.getElementsByTagName('script')[0];
+
+		// Create a new script element and set its id
+		var facebookJS = document.createElement('script');
+		facebookJS.id = 'facebook-jssdk';
+
+		// Set the new script's source to the source of the Facebook JS SDK
+		facebookJS.src = '//connect.facebook.net/en_US/all.js';
+
+		// Insert the Facebook JS SDK into the DOM
+		firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
+}());
+</script>
+				<div class="fb-like" data-href="http://facebook.com/RippedToShredsCommunity" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
+				<br><br>	
+					<!--div class="fb-share-button" data-href="http://facebook.com/RippedToShredsCommunity" data-type="button_count"></div-->
+					<!--div class="fb-comments" data-href="http://facebook.com/RippedToShredsCommunity" data-numposts="5" data-colorscheme="light"></div-->
+			</div>
 		<div class="five columns" style="background-color:#CCCCFF; margin-bottom:2.5%;">
 			<h4>Register</h4>
 			<p>Please fill out all pages</p>
@@ -301,53 +349,59 @@ if( isset($_SESSION['user']) )
 						</div>
 					</li>
 				</ul>
-				
+
 				<button type="submit" class="button">Register</button>
-				<?php 
-				if( !empty($regErrors) )
-				{
-				?>
+<?php 
+if( !empty($regErrors) )
+{
+?>
 					<a href="" class="button alert" name="registerErrors" data-reveal-id="registerModal">Errors</a>
-				<?php 
-				}
-				else if( $_GET['success'] == 1 )
-				{
-				?>
+<?php 
+}
+else if( $_GET['success'] == 1 )
+{
+?>
 					<a href="" class="button success" name="registerSuccess" data-reveal-id="registerModal">Success</a>
-				<?php
-				}
-				?>
+<?php
+}
+?>
 			</form>	
 		</div>
 		<div class="one column">
 		</div>	
 		<hr />
+
+	<footer align="center" style="font-color:#FFFFFF">
+		Copyright 2013 - The Fireballs
+	</footer>
+
+	<br><br>
 	</div>
 
 	<div id="registerModal" class="reveal-modal [expand, xlarge, large, medium, small]">
-		<?php 
-		if( !empty($regErrors) ) 
-		{
-		?>
+<?php 
+if( !empty($regErrors) ) 
+{
+?>
 			<h5>Registration Errors</h5>
 			<ul style="list-style-type:none; color:red; text-align:left;">
-			<?php
-			foreach( $regErrors as $error )
-			{
-				echo "<li>{$error}</li>";
-			}
-			?>
-			</ul>
-		<?php
-		}
-		else
+<?php
+		foreach( $regErrors as $error )
 		{
-		?>
+				echo "<li>{$error}</li>";
+		}
+?>
+			</ul>
+<?php
+}
+else
+{
+?>
 			<h5>Successful Registration!</h5>
 			<p>Check your email for a verification link to get started!</p>
-		<?php
-		}
-		?>
+<?php
+}
+?>
 
 		<a class="close-reveal-modal">&#215;</a>
 	</div>
@@ -355,32 +409,31 @@ if( isset($_SESSION['user']) )
 	<div id="loginModal" class="reveal-modal [expand, xlarge, large, medium, small]">
 		<h5>Login Errors</h5>
 		<ul style="list-style-type:none; color:red; text-align:left;">	
-		<?php
-		foreach( $errors as $error )
-		{
-			echo "<li>{$error}</li>";
-		}
-		?>
+<?php
+foreach( $errors as $error )
+{
+		echo "<li>{$error}</li>";
+}
+?>
 		</ul>
 		<a class="close-reveal-modal">&#215;</a>
-	</div>
 
 	<!-- Included JS Files (Compressed) -->
 	<script src="javascripts/jquery.js"></script>
-	<script src="javascripts/foundation.min.js"></script>
-  
+	<script src="javascripts/foundation.min.js"></script>	
+
+	</div>	
+
 	<!-- Initialize JS Plugins -->
 	<script src="javascripts/app.js"></script>
 
-	<script>
-		$(window).load(function(){
+<script>
+$(window).load(function(){
 		$("#featured").orbit();
-		});
-	</script> 
+});
+</script> 
 
-	<footer align="center">
-		Copyright 2013 - The Fireballs
-	</footer>
+
 
 </body>
 
